@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛡 Obsidian Nope Pro | Meeting Escape Toolkit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet">
+  <style>
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .floating-icon {
+      animation: float 4s ease-in-out infinite;
+    }
+    .excuse-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .excuse-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+    }
+    .btn-glow {
+      box-shadow: 0 0 15px rgba(123, 97, 255, 0.5);
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 20px rgba(123, 97, 255, 0.7);
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-900 to-purple-900 text-purple-100">
+  <div id="app" class="container mx-auto px-4 py-8 max-w-3xl">
+    <!-- Header -->
+    <header class="text-center mb-10 fade-in">
+      <div class="floating-icon text-6xl mb-4">🛡</div>
+      <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-300 to-indigo-300 bg-clip-text text-transparent mb-2">
+        Obsidian Nope Pro
+      </h1>
+      <p class="text-lg text-purple-300 italic">"No is the new productivity."</p>
+      <p class="mt-4 text-purple-200">Professional meeting escape toolkit for teams</p>
+      
+      <!-- Stats Counter -->
+      <div class="stats shadow bg-base-100/10 border border-purple-800/50 mt-6">
+        <div class="stat">
+          <div class="stat-title text-purple-300">Meetings Skipped</div>
+          <div class="stat-value text-purple-100" id="meetings-skipped">0</div>
+          <div class="stat-desc text-purple-400">Hours saved: <span id="hours-saved">0</span></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex flex-col items-center fade-in">
+      <!-- Theme Toggle -->
+      <div class="mb-8">
+        <button id="theme-toggle" class="btn btn-circle btn-sm btn-ghost">
+          <span id="theme-icon">🌙</span>
+        </button>
+      </div>
+
+      <!-- Excuse Generator -->
+      <div class="w-full">
+        <div class="flex flex-col md:flex-row gap-4 mb-6">
+          <button id="generate-btn" class="btn btn-primary btn-lg btn-glow flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 border-0">
+            Generate Excuse
+          </button>
+          <div class="dropdown dropdown-end flex-1">
+            <button tabindex="0" class="btn btn-lg w-full bg-purple-800/50 border-purple-700">
+              Filter: <span id="filter-label">All</span> ▼
+            </button>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-purple-900 rounded-box w-52">
+              <li><a data-filter="all">All Excuses</a></li>
+              <li><a data-filter="polite">Polite</a></li>
+              <li><a data-filter="strategic">Strategic</a></li>
+              <li><a data-filter="humorous">Humorous</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Excuse Display -->
+        <div id="excuse-container" class="hidden fade-in">
+          <div class="excuse-card card bg-base-100/10 backdrop-blur-sm border border-purple-800/50 shadow-xl mb-6">
+            <div class="card-body">
+              <h2 class="card-title text-purple-100">
+                <span id="excuse-category" class="badge badge-sm"></span>
+                Your Meeting Escape:
+              </h2>
+              <p id="excuse-text" class="text-xl my-4 text-purple-50"></p>
+              <div class="card-actions justify-between">
+                <button id="calendar-decline" class="btn btn-sm btn-outline border-purple-700 text-purple-300">
+                  Add to Calendar as Decline
+                </button>
+                <button id="copy-btn" class="btn btn-sm btn-success">
+                  Copy to Clipboard
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Excuse -->
+        <div class="card bg-base-100/10 border border-purple-800/50 mt-10">
+          <div class="card-body">
+            <h2 class="card-title text-purple-100">Add Custom Excuse</h2>
+            <textarea id="custom-excuse" class="textarea textarea-bordered bg-purple-900/50 border-purple-700" placeholder="E.g., 'This conflicts with our no-meeting Wednesdays policy'"></textarea>
+            <div class="card-actions justify-end mt-4">
+              <button id="save-excuse" class="btn btn-sm btn-primary">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 text-center text-sm text-purple-400">
+      <p>Reclaim your time. One meeting at a time. ✨</p>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Theme toggle
+      const themeToggle = document.getElementById('theme-toggle');
+      const themeIcon = document.getElementById('theme-icon');
+      const html = document.documentElement;
+      
+      themeToggle.addEventListener('click', () => {
+        if (html.getAttribute('data-theme') === 'dark') {
+          html.setAttribute('data-theme', 'light');
+          themeIcon.textContent = '☀️';
+        } else {
+          html.setAttribute('data-theme', 'dark');
+          themeIcon.textContent = '🌙';
+        }
+      });
+
+      // Excuses database (50 professional excuses)
+      const excuses = [
+        { text: "I'm in a deep focus session right now - can we sync asynchronously via email?", category: "polite" },
+        { text: "Per our team's meeting policy, I'm declining meetings without clear outcomes this week.", category: "strategic" },
+        { text: "This conflicts with my scheduled time-block for project deliverables.", category: "polite" },
+        { text: "I'm optimizing for async communication this sprint - can you share the agenda first?", category: "strategic" },
+        { text: "My calendar analytics show I need to reduce meetings by 20% this month.", category: "strategic" },
+        { text: "This seems better suited for [Team X] - I'll connect you with them.", category: "strategic" },
+        { text: "I'm at capacity for new context switches today - can we revisit next week?", category: "polite" },
+        { text: "Our no-meeting-Wednesdays policy applies here.", category: "strategic" },
+        { text: "I'm currently in a productivity sprint - can we shorten this to 15 minutes?", category: "polite" },
+        { text: "This overlaps with my CEO-mandated 'focus time' (seriously, ask her).", category: "humorous" },
+        { text: "I've reached my weekly meeting quota (self-imposed but important).", category: "strategic" },
+        { text: "My future self will thank me for declining this meeting.", category: "humorous" },
+        { text: "This time is reserved for my team's weekly planning ritual.", category: "polite" },
+        { text: "I'm practicing radical calendar hygiene this quarter.", category: "strategic" },
+        { text: "My cat has scheduled an important system update (it's automatic).", category: "humorous" },
+        { text: "I'm bandwidth-negative until Friday - can we async this?", category: "polite" },
+        { text: "Our department is testing a 'meeting-free Thursday' experiment.", category: "strategic" },
+        { text: "I'm currently rebooting my mental RAM - maybe later?", category: "humorous" },
+        { text: "This agenda doesn't meet our team's ROI threshold for synchronous time.", category: "strategic" },
+        { text: "I'm in the middle of a creative flow state - rain check?", category: "polite" },
+        { text: "That time conflicts with my scheduled existential crisis.", category: "humorous" },
+        { text: "I'm prioritizing deep work to hit our quarterly goals.", category: "polite" },
+        { text: "My calendar is currently in defensive mode against time vampires.", category: "humorous" },
+        { text: "This overlaps with our engineering team's 'no context-switching' block.", category: "strategic" },
+        { text: "I'm currently experiencing a calendar emergency (it's full).", category: "humorous" },
+        { text: "Per my time audit, I'm reserving these slots for focused work.", category: "strategic" },
+        { text: "I've got a hard stop before my next hard stop at that time.", category: "humorous" },
+        { text: "This meeting doesn't align with my current OKRs - suggest async follow-up.", category: "strategic" },
+        { text: "I'm in the zone right now and can't context switch.", category: "polite" },
+        { text: "My attention span has left the building for that time slot.", category: "humorous" },
+        { text: "I'm applying our 'default to async' communication policy here.", category: "strategic" },
+        { text: "This conflicts with my maker's schedule (I'm in creation mode).", category: "polite" },
+        { text: "I'm currently optimizing my work-life algorithm and this didn't make the cut.", category: "humorous" },
+        { text: "Our team is testing a 'meeting budget' system - I've exceeded mine.", category: "strategic" },
+        { text: "I'd love to, but I'm booked solid with actual work at that time.", category: "polite" },
+        { text: "That time is reserved for my daily dose of sanity preservation.", category: "humorous" },
+        { text: "This conflicts with my scheduled 'strategic avoidance' block.", category: "humorous" },
+        { text: "I'm practicing intentional meeting attendance this quarter.", category: "strategic" },
+        { text: "My productivity coach says I should decline meetings without prep materials.", category: "polite" },
+        { text: "This overlaps with my 'pretending to work' time (just kidding... mostly).", category: "humorous" },
+        { text: "I'm currently time-blocking to hit my goals - can we shorten this?", category: "polite" },
+        { text: "Our team's meeting ROI calculator suggests declining this one.", category: "strategic" },
+        { text: "I need to preserve my cognitive load today - can we skip this one?", category: "polite" },
+        { text: "This conflicts with my 'avoiding meetings about meetings' block.", category: "humorous" },
+        { text: "I'm enforcing strict calendar boundaries this month.", category: "strategic" },
+        { text: "That time is reserved for staring blankly at my monitor (it's important).", category: "humorous" },
+        { text: "I'm currently bottlenecked - suggest async alternatives.", category: "polite" },
+        { text: "This meeting doesn't pass my 'would I pay $500 to attend?' test.", category: "strategic" },
+        { text: "I'm optimizing for maker time this week - can we async?", category: "polite" },
+        { text: "My psychic told me to avoid meetings at this moon phase.", category: "humorous" }
+      ];
+
+      // Load custom excuses from localStorage
+      let customExcuses = JSON.parse(localStorage.getItem('customExcuses')) || [];
+      let allExcuses = [...excuses, ...customExcuses];
+      let currentFilter = 'all';
+
+      // DOM elements
+      const generateBtn = document.getElementById('generate-btn');
+      const excuseContainer = document.getElementById('excuse-container');
+      const excuseText = document.getElementById('excuse-text');
+      const excuseCategory = document.getElementById('excuse-category');
+      const copyBtn = document.getElementById('copy-btn');
+      const calendarDeclineBtn = document.getElementById('calendar-decline');
+      const filterLabel = document.getElementById('filter-label');
+      const meetingsSkippedEl = document.getElementById('meetings-skipped');
+      const hoursSavedEl = document.getElementById('hours-saved');
+      const customExcuseInput = document.getElementById('custom-excuse');
+      const saveExcuseBtn = document.getElementById('save-excuse');
+
+      // Stats
+      let meetingsSkipped = parseInt(localStorage.getItem('meetingsSkipped')) || 0;
+      let hoursSaved = parseInt(localStorage.getItem('hoursSaved')) || 0;
+      updateStats();
+
+      // Filter excuses
+      document.querySelectorAll('[data-filter]').forEach(item => {
+        item.addEventListener('click', function() {
+          currentFilter = this.getAttribute('data-filter');
+          filterLabel.textContent = this.textContent;
+        });
+      });
+
+      // Generate random excuse
+      generateBtn.addEventListener('click', () => {
+        let filteredExcuses = allExcuses;
+        if (currentFilter !== 'all') {
+          filteredExcuses = allExcuses.filter(excuse => excuse.category === currentFilter);
+        }
+        
+        if (filteredExcuses.length > 0) {
+          const randomExcuse = filteredExcuses[Math.floor(Math.random() * filteredExcuses.length)];
+          excuseText.textContent = randomExcuse.text;
+          excuseCategory.textContent = randomExcuse.category.charAt(0).toUpperCase() + randomExcuse.category.slice(1);
+          excuseCategory.className = 'badge badge-sm ' + getCategoryClass(randomExcuse.category);
+          excuseContainer.classList.remove('hidden');
+          
+          // Update stats
+          meetingsSkipped++;
+          hoursSaved += 0.5; // Assuming average 30min meeting
+          updateStats();
+          localStorage.setItem('meetingsSkipped', meetingsSkipped);
+          localStorage.setItem('hoursSaved', hoursSaved);
+          
+          // Scroll to excuse
+          excuseContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          excuseText.textContent = "No excuses match your filter. Try a different category or add custom ones!";
+          excuseContainer.classList.remove('hidden');
+        }
+      });
+
+      // Copy to clipboard
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(excuseText.textContent).then(() => {
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => {
+            copyBtn.textContent = 'Copy to Clipboard';
+          }, 2000);
+        });
+      });
+
+      // Calendar decline
+      calendarDeclineBtn.addEventListener('click', () => {
+        const eventTitle = `Declined: Meeting (via Obsidian Nope)`;
+        const eventDetails = `Reason: ${excuseText.textContent}`;
+        const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&details=${encodeURIComponent(eventDetails)}&dates=20240520T140000/20240520T143000`;
+        window.open(calendarUrl, '_blank');
+      });
+
+      // Save custom excuse
+      saveExcuseBtn.addEventListener('click', () => {
+        const text = customExcuseInput.value.trim();
+        if (text) {
+          const newExcuse = {
+            text: text,
+            category: 'custom'
+          };
+          customExcuses.push(newExcuse);
+          allExcuses = [...excuses, ...customExcuses];
+          localStorage.setItem('customExcuses', JSON.stringify(customExcuses));
+          customExcuseInput.value = '';
+          
+          // Show confirmation
+          saveExcuseBtn.textContent = 'Saved!';
+          setTimeout(() => {
+            saveExcuseBtn.textContent = 'Save';
+          }, 2000);
+        }
+      });
+
+      // Helper functions
+      function getCategoryClass(category) {
+        switch(category) {
+          case 'polite': return 'badge-primary';
+          case 'strategic': return 'badge-secondary';
+          case 'humorous': return 'badge-accent';
+          default: return 'badge-outline';
+        }
+      }
+
+      function updateStats() {
+        meetingsSkippedEl.textContent = meetingsSkipped;
+        hoursSavedEl.textContent = hoursSaved;
+      }
+    });
+  </script>
+</body>
+</html>
